@@ -50,6 +50,8 @@ public class ACMESpiele extends VerticalLayout {
 
         // carregarDados();
 
+        VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
+
         Text titulo = new Text("ACME Spiele");
         add(titulo);
 
