@@ -4,8 +4,10 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -15,19 +17,41 @@ import java.time.format.DateTimeFormatter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ArrayNode;
 
 import br.pucrs.poo.trabalho2.dados.*;
 
 @PageTitle("ACME Spiele - Sistema de Locacao de Jogos")
 @Route("")
 public class ACMESpiele extends VerticalLayout {
-    private Clientes clientes = new Clientes();
-    private Jogos jogos = new Jogos();
-    private Contratos contratos = new Contratos();
+    private Clientes clientes;
+    private Jogos jogos;
+    private Contratos contratos;
 
     public ACMESpiele() {
+        clientes = VaadinSession.getCurrent().getAttribute(Clientes.class);
+        if (clientes == null) {
+            clientes = new Clientes();
+            VaadinSession.getCurrent().setAttribute(Clientes.class, clientes);
+        }
+        jogos = VaadinSession.getCurrent().getAttribute(Jogos.class);
+        if (jogos == null) {
+            jogos = new Jogos();
+            VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
+        }
+        contratos = VaadinSession.getCurrent().getAttribute(Contratos.class);
+        if (contratos == null) {
+            contratos = new Contratos();
+            VaadinSession.getCurrent().setAttribute(Contratos.class, contratos);
+        }
+
         Boolean dialogoExibido = (Boolean) VaadinSession.getCurrent().getAttribute("dialogoInicialExibido");
         if (dialogoExibido == null || !dialogoExibido) {
             VaadinSession.getCurrent().setAttribute("dialogoInicialExibido", true);
@@ -51,9 +75,6 @@ public class ACMESpiele extends VerticalLayout {
             dialogo.add(conteudoDialogo);
             dialogo.open();
         }
-
-        VaadinSession.getCurrent().setAttribute(Clientes.class, clientes);
-        VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
 
         Text titulo = new Text("ACME Spiele");
         add(titulo);
@@ -104,8 +125,60 @@ public class ACMESpiele extends VerticalLayout {
         add(area3);
 
         //// AREA DE SALVAR/CARREGAR DADOS (11-12)
-        Button salvarDados = new Button("Salvar dados");
-        Button carregarDados = new Button("Carregar dados");
+        Button salvarDados = new Button("Salvar dados", e -> {
+            Dialog dialogo = new Dialog();
+            dialogo.setCloseOnOutsideClick(false);
+
+            Text pergunta = new Text("Qual o nome do arquivo para salvar os dados?");
+            TextField arquivoField = new TextField("Nome do arquivo (sem extensão)");
+            arquivoField.setValue("dados");
+
+            Button confirmarBtn = new Button("Salvar", ev -> {
+                String nome = arquivoField.getValue();
+                if (nome == null || nome.isBlank()) {
+                    Notification.show("Informe o nome do arquivo.", 3000, Notification.Position.MIDDLE);
+                    return;
+                }
+                String arquivo = nome.trim() + ".json";
+                salvaDados(arquivo);
+                Notification.show("Dados salvos em: " + arquivo, 3000, Notification.Position.MIDDLE);
+                dialogo.close();
+            });
+            Button cancelarBtn = new Button("Cancelar", ev -> dialogo.close());
+
+            HorizontalLayout botoesDialogo = new HorizontalLayout(confirmarBtn, cancelarBtn);
+            VerticalLayout conteudoDialogo = new VerticalLayout(pergunta, arquivoField, botoesDialogo);
+            dialogo.add(conteudoDialogo);
+            dialogo.open();
+        });
+
+        Button carregarDados = new Button("Carregar dados", e -> {
+            Dialog dialogo = new Dialog();
+            dialogo.setCloseOnOutsideClick(false);
+
+            Text pergunta = new Text("Qual o nome do arquivo para carregar os dados?");
+            TextField arquivoField = new TextField("Nome do arquivo (sem extensão)");
+            arquivoField.setValue("dados");
+
+            Button confirmarBtn = new Button("Carregar", ev -> {
+                String nome = arquivoField.getValue();
+                if (nome == null || nome.isBlank()) {
+                    Notification.show("Informe o nome do arquivo.", 3000, Notification.Position.MIDDLE);
+                    return;
+                }
+                String arquivo = nome.trim() + ".json";
+                carregaDados(arquivo);
+                Notification.show("Dados carregados de: " + arquivo, 3000, Notification.Position.MIDDLE);
+                dialogo.close();
+            });
+            Button cancelarBtn = new Button("Cancelar", ev -> dialogo.close());
+
+            HorizontalLayout botoesDialogo = new HorizontalLayout(confirmarBtn, cancelarBtn);
+            VerticalLayout conteudoDialogo = new VerticalLayout(pergunta, arquivoField, botoesDialogo);
+            dialogo.add(conteudoDialogo);
+            dialogo.open();
+        });
+
         HorizontalLayout botoes = new HorizontalLayout(salvarDados, carregarDados);
         add(botoes);
 
@@ -265,6 +338,203 @@ public class ACMESpiele extends VerticalLayout {
             } else {
                 System.out.println("Contrato adicionado com sucesso: " + contrato.descrever());
             }
+        }
+    }
+
+    public void carregaDados(String arquivo) {
+        ObjectMapper mapper = new ObjectMapper();
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+        JsonNode raiz;
+        try {
+            raiz = mapper.readTree(new File(arquivo));
+        } catch (Exception e) {
+            System.out.println("Erro ao ler o arquivo de dados " + arquivo + ": " + e.getMessage());
+            return;
+        }
+
+        // CLIENTES
+        for (JsonNode noCliente : raiz.path("clientes")) {
+            try {
+                int tipo = noCliente.path("tipo").asInt();
+                Cliente cliente = null;
+                if (tipo == 1) {
+                    cliente = new ClienteIndividual(
+                        noCliente.path("numero").asInt(),
+                        noCliente.path("nome").asString(),
+                        noCliente.path("email").asString(),
+                        noCliente.path("cpf").asString()
+                    );
+                } else if (tipo == 2) {
+                    cliente = new ClienteCorporativo(
+                        noCliente.path("numero").asInt(),
+                        noCliente.path("nome").asString(),
+                        noCliente.path("email").asString(),
+                        noCliente.path("cnpj").asString(),
+                        noCliente.path("nomeFantasia").asString()
+                    );
+                }
+
+                if (cliente != null) {
+                    for (JsonNode noFp : noCliente.path("formasPagamento")) {
+                        int tipoFp = noFp.path("tipo").asInt();
+                        FormaPagamento fp = null;
+                        if (tipoFp == 1) {
+                            fp = new CartaoCredito(
+                                noFp.path("cod").asInt(),
+                                noFp.path("diaVencimento").asInt(),
+                                noFp.path("numero").asString(),
+                                LocalDate.parse(noFp.path("validade").asString(), formatador)
+                            );
+                        } else if (tipoFp == 2) {
+                            fp = new PIX(
+                                noFp.path("cod").asInt(),
+                                noFp.path("diaVencimento").asInt(),
+                                noFp.path("chave").asString()
+                            );
+                        }
+                        if (fp != null) {
+                            cliente.addFormaPagamento(fp);
+                        }
+                    }
+
+                    if (clientes.adicionar(cliente)) {
+                        System.out.println("Cliente adicionado com sucesso: " + cliente.getNome());
+                    } else {
+                        System.out.println("Cliente já existe ou ID duplicado: " + cliente.getNumero());
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao processar cliente do arquivo de dados: " + e.getMessage());
+            }
+        }
+
+        // JOGOS
+        for (JsonNode noJogo : raiz.path("jogos")) {
+            try {
+                Jogo jogo = new Jogo(
+                    noJogo.path("codigo").asInt(),
+                    noJogo.path("nome").asString(),
+                    noJogo.path("ano").asInt(),
+                    noJogo.path("valorDiario").asDouble(),
+                    Categoria.valueOf(noJogo.path("categoria").asString())
+                );
+                if (jogos.adicionar(jogo)) {
+                    System.out.println("Jogo adicionado com sucesso: " + jogo.getNome());
+                } else {
+                    System.out.println("Jogo já existe ou ID duplicado: " + jogo.getCodigo());
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao processar jogo do arquivo de dados: " + e.getMessage());
+            }
+        }
+
+        // CONTRATOS
+        for (JsonNode noContrato : raiz.path("contratos")) {
+            try {
+                Cliente c = clientes.buscar(noContrato.path("clienteNumero").asInt());
+                Jogo j = jogos.buscar(noContrato.path("jogoCodigo").asInt());
+                FormaPagamento fp = (c != null) ? c.buscarFormaPagamento(noContrato.path("formaPagamentoCod").asInt()) : null;
+
+                if (c != null && j != null && fp != null) {
+                    Contrato contrato = new Contrato(
+                        noContrato.path("id").asInt(),
+                        LocalDate.parse(noContrato.path("data").asString(), formatador),
+                        noContrato.path("periodo").asInt(),
+                        c,
+                        j,
+                        fp
+                    );
+                    if (contratos.adicionar(contrato)) {
+                        System.out.println("Contrato adicionado com sucesso: " + contrato.descrever());
+                    } else {
+                        System.out.println("Contrato já existe para o jogo " + j.getNome() + " ou ID duplicado: " + contrato.getId());
+                    }
+                } else {
+                    System.out.println("Cliente, jogo ou forma de pagamento não encontrado para o contrato do arquivo de dados.");
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao processar contrato do arquivo de dados: " + e.getMessage());
+            }
+        }
+    }
+
+    public void salvaDados(String arquivo) {
+        ObjectMapper mapper = new ObjectMapper();
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("d/M/yyyy");
+
+        ObjectNode raiz = mapper.createObjectNode();
+
+        // CLIENTES
+        ArrayNode arrayClientes = mapper.createArrayNode();
+        for (Cliente c : clientes.getCopia()) {
+            ObjectNode noCliente = mapper.createObjectNode();
+            noCliente.put("numero", c.getNumero());
+            noCliente.put("nome", c.getNome());
+            noCliente.put("email", c.getEmail());
+
+            if (c instanceof ClienteIndividual ci) {
+                noCliente.put("tipo", 1);
+                noCliente.put("cpf", ci.getCpf());
+            } else if (c instanceof ClienteCorporativo cc) {
+                noCliente.put("tipo", 2);
+                noCliente.put("cnpj", cc.getCnpj());
+                noCliente.put("nomeFantasia", cc.getNomeFantasia());
+            }
+
+            ArrayNode arrayFormasPagamento = mapper.createArrayNode();
+            for (FormaPagamento fp : c.getFormasPagamento()) {
+                ObjectNode noFp = mapper.createObjectNode();
+                noFp.put("cod", fp.getCod());
+                noFp.put("diaVencimento", fp.getDiaVencimento());
+                if (fp instanceof CartaoCredito cartao) {
+                    noFp.put("tipo", 1);
+                    noFp.put("numero", cartao.getNumero());
+                    noFp.put("validade", cartao.getValidade().format(formatador));
+                } else if (fp instanceof PIX pix) {
+                    noFp.put("tipo", 2);
+                    noFp.put("chave", pix.getChave());
+                }
+                arrayFormasPagamento.add(noFp);
+            }
+            noCliente.set("formasPagamento", arrayFormasPagamento);
+
+            arrayClientes.add(noCliente);
+        }
+        raiz.set("clientes", arrayClientes);
+
+        // JOGOS
+        ArrayNode arrayJogos = mapper.createArrayNode();
+        for (Jogo j : jogos.getCopia()) {
+            ObjectNode noJogo = mapper.createObjectNode();
+            noJogo.put("codigo", j.getCodigo());
+            noJogo.put("nome", j.getNome());
+            noJogo.put("ano", j.getAno());
+            noJogo.put("valorDiario", j.getValorDiario());
+            noJogo.put("categoria", j.getCategoria().name());
+            arrayJogos.add(noJogo);
+        }
+        raiz.set("jogos", arrayJogos);
+
+        // CONTRATOS
+        ArrayNode arrayContratos = mapper.createArrayNode();
+        for (Contrato contrato : contratos.getCopia()) {
+            ObjectNode noContrato = mapper.createObjectNode();
+            noContrato.put("id", contrato.getId());
+            noContrato.put("data", contrato.getData().format(formatador));
+            noContrato.put("periodo", contrato.getPeriodo());
+            noContrato.put("clienteNumero", contrato.getCliente().getNumero());
+            noContrato.put("jogoCodigo", contrato.getJogo().getCodigo());
+            noContrato.put("formaPagamentoCod", contrato.getFormaPagamento().getCod());
+            arrayContratos.add(noContrato);
+        }
+        raiz.set("contratos", arrayContratos);
+
+        try {
+            mapper.writeValue(new File(arquivo), raiz);
+            System.out.println("Dados salvos com sucesso no arquivo: " + arquivo);
+        } catch (Exception e) {
+            System.out.println("Erro ao salvar o arquivo de dados " + arquivo + ": " + e.getMessage());
         }
     }
 }
