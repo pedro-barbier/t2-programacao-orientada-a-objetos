@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -29,26 +28,29 @@ public class ACMESpiele extends VerticalLayout {
     private Contratos contratos = new Contratos();
 
     public ACMESpiele() {
-        Dialog dialogo = new Dialog();
-        dialogo.setCloseOnOutsideClick(false);
-        dialogo.setCloseOnEsc(false);
+        Boolean dialogoExibido = (Boolean) VaadinSession.getCurrent().getAttribute("dialogoInicialExibido");
+        if (dialogoExibido == null || !dialogoExibido) {
+            VaadinSession.getCurrent().setAttribute("dialogoInicialExibido", true);
 
-        Text pergunta = new Text("Deseja carregar os dados iniciais do sistema?");
+            Dialog dialogo = new Dialog();
+            dialogo.setCloseOnOutsideClick(false);
+            dialogo.setCloseOnEsc(false);
 
-        Button simBtn = new Button("Sim", e -> {
-            inicializar();
-            dialogo.close();
-        });
-        Button naoBtn = new Button("Não", e -> dialogo.close());
+            Text pergunta = new Text("Deseja carregar os dados iniciais do sistema?");
 
-        HorizontalLayout botoesDialogo = new HorizontalLayout(simBtn, naoBtn);
-        botoesDialogo.setJustifyContentMode(JustifyContentMode.START);
+            Button simBtn = new Button("Sim", e -> {
+                inicializar();
+                dialogo.close();
+            });
+            Button naoBtn = new Button("Não", e -> dialogo.close());
 
-        VerticalLayout conteudoDialogo = new VerticalLayout(pergunta, botoesDialogo);
-        dialogo.add(conteudoDialogo);
-        dialogo.open();
+            HorizontalLayout botoesDialogo = new HorizontalLayout(simBtn, naoBtn);
+            botoesDialogo.setJustifyContentMode(JustifyContentMode.START);
 
-        // carregarDados();
+            VerticalLayout conteudoDialogo = new VerticalLayout(pergunta, botoesDialogo);
+            dialogo.add(conteudoDialogo);
+            dialogo.open();
+        }
 
         VaadinSession.getCurrent().setAttribute(Clientes.class, clientes);
         VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
