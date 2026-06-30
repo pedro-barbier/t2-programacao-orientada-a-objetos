@@ -67,4 +67,13 @@ public abstract class Cliente {
         }
         return aux;
     }
+
+    public FormaPagamento buscarFormaPagamento(int cod) {
+        for (FormaPagamento f : formasPagamento) {
+            if (f.getCod() == cod) {
+                return f;
+            }
+        }
+        return null;
+    }
 }
