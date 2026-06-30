@@ -7,7 +7,7 @@ public class Contratos {
     private List<Contrato> contratos = new ArrayList<>();
 
     public boolean adicionar(Contrato contrato){
-        if (buscar(contrato.getId()) == null){
+        if (buscar(contrato.getId()) == null && buscar(contrato.getJogo()).isEmpty()){
             contratos.add(contrato);
             return true;
         }

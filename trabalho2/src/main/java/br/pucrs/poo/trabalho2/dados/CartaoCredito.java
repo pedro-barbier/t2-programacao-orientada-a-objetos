@@ -1,12 +1,12 @@
 package br.pucrs.poo.trabalho2.dados;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class CartaoCredito extends FormaPagamento {
     private String numero;
-    private Date validade;
+    private LocalDate validade;
 
-    public CartaoCredito(int cod, int diaVencimento, String numero, Date validade) {
+    public CartaoCredito(int cod, int diaVencimento, String numero, LocalDate validade) {
         super(cod, diaVencimento);
         this.numero = numero;
         this.validade = validade;
@@ -20,11 +20,11 @@ public class CartaoCredito extends FormaPagamento {
         this.numero = numero;
     }
 
-    public Date getValidade() {
+    public LocalDate getValidade() {
         return this.validade;
     }
 
-    public void setValidade(Date validade) {
+    public void setValidade(LocalDate validade) {
         this.validade = validade;
     }
 

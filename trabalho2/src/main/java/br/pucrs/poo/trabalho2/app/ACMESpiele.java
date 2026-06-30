@@ -3,14 +3,19 @@ package br.pucrs.poo.trabalho2.app;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -24,9 +29,29 @@ public class ACMESpiele extends VerticalLayout {
     private Contratos contratos = new Contratos();
 
     public ACMESpiele() {
+        Dialog dialogo = new Dialog();
+        dialogo.setCloseOnOutsideClick(false);
+        dialogo.setCloseOnEsc(false);
+
+        Text pergunta = new Text("Deseja carregar os dados iniciais do sistema?");
+
+        Button simBtn = new Button("Sim", e -> {
+            inicializar();
+            dialogo.close();
+        });
+        Button naoBtn = new Button("Não", e -> dialogo.close());
+
+        HorizontalLayout botoesDialogo = new HorizontalLayout(simBtn, naoBtn);
+        botoesDialogo.setJustifyContentMode(JustifyContentMode.START);
+
+        VerticalLayout conteudoDialogo = new VerticalLayout(pergunta, botoesDialogo);
+        dialogo.add(conteudoDialogo);
+        dialogo.open();
+
         // carregarDados();
 
         VaadinSession.getCurrent().setAttribute(Clientes.class, clientes);
+        VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
 
         Text titulo = new Text("ACME Spiele");
         add(titulo);
@@ -91,31 +116,153 @@ public class ACMESpiele extends VerticalLayout {
 
     }
 
-    /*
-        O método inicializar() da classe ACMESpiele deve ler dados de arquivos de entrada para
-        cadastrar alguns clientes, jogos e contratos iniciais (os formatos dos arquivos de entrada são
-        apresentados no Apêndice do enunciado). Cada contrato lido do arquivo de contratos deve ser
-        armazenado em uma fila. Após a leitura de todos os contratos do arquivo, cada contrato válido
-        deve ser cadastrado no sistema
-        Todo cliente precisa se cadastrar com seus dados; e pode ser individual (pessoa física) ou
-        corporativo (pessoa jurídica). O método descrever() deve gerar uma String com os valores dos
-        atributos separados por (;) ponto-e-vírgula.
-        A empresa disponibiliza diversos jogos eletrônicos exclusivos (podem ser contratados apenas
-        por um cliente de cada vez) para serem contratados para serem jogados por um determinado
-        período (em dias) a partir da data do contrato.
-        No contrato é definida uma forma de pagamento.
-     */
     public void inicializar() {
+        // CLIENTES
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/dados/CLIENTESINICIAL.CSV")))) {
+            String linha = br.readLine();
+            while ((linha = br.readLine()) != null) {
+                try {
+                    String[] valores = linha.split(";");
+                    int tipo = Integer.parseInt(valores[3]);
+                    if (tipo == 1) {
+                        clientes.adicionar(
+                            new ClienteIndividual(
+                                Integer.parseInt(valores[0]), 
+                                valores[1],
+                                valores[2], 
+                                valores[4]
+                            )
+                        );
+                    } else if (tipo == 2) {
+                        clientes.adicionar(
+                            new ClienteCorporativo(
+                                Integer.parseInt(valores[0]), 
+                                valores[1],
+                                valores[2], 
+                                valores[4], 
+                                valores[5]
+                            )
+                        );
+                    }
+                    System.out.println("Cliente adicionado com sucesso: " + valores[1]);
+                } catch (Exception e) {
+                    System.out.println("Erro ao processar a linha do arquivo de clientes: " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo de clientes: " + e.getMessage());
+        }
+
+        // JOGOS
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/dados/JOGOSINICIAL.CSV")))) {
+            String linha = br.readLine();
+            while ((linha = br.readLine()) != null) {
+                try {
+                    String[] valores = linha.split(";");
+                    jogos.adicionar(
+                        new Jogo(
+                            Integer.parseInt(valores[0]), 
+                            valores[1], 
+                            Integer.parseInt(valores[2]), 
+                            Double.parseDouble(valores[3]), 
+                            Categoria.valueOf(valores[4])
+                        )
+                    );
+                    System.out.println("Jogo adicionado com sucesso: " + valores[1]);
+                } catch (Exception e) {
+                    System.out.println("Erro ao processar a linha do arquivo de jogos: " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo de jogos: " + e.getMessage());
+        }
+
+        // FORMAS DE PAGAMENTO
+        DateTimeFormatter formatador = DateTimeFormatter.ofPattern("d/M/yyyy");
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/dados/FORMASPAGAMENTOINICIAL.CSV")))) {
+            String linha = br.readLine();
+            while ((linha = br.readLine()) != null) {
+                try {
+                    String[] valores = linha.split(";");
+
+                    FormaPagamento fp = null;
+
+                    int tipo = Integer.parseInt(valores[3]);
+                    if (tipo == 1) {
+                        fp = new CartaoCredito(
+                            Integer.parseInt(valores[0]),
+                            Integer.parseInt(valores[1]), 
+                            valores[4],
+                            LocalDate.parse(valores[5], formatador)
+                        );
+                    } else if (tipo == 2) {
+                        fp = new PIX(
+                            Integer.parseInt(valores[0]),
+                            Integer.parseInt(valores[1]),
+                            valores[4]
+                        );
+                    }
+                    
+                    Cliente c = clientes.buscar(Integer.parseInt(valores[2]));
+                    if (c!=null && fp!=null) {
+                        c.addFormaPagamento(fp);
+                        System.out.println("Forma de pagamento adicionada com sucesso para o cliente: " + c.getNome());
+                    } else {
+                        System.out.println("Cliente não encontrado ou forma de pagamento inválida para a linha: " + linha);
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("Erro ao processar a linha do arquivo de formas de pagamento: " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo de formas de pagamento: " + e.getMessage());
+        }
+
         // CONTRATOS
         Queue<Contrato> contratos = new LinkedList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/dados/CONTRATOSINICIAL.csv"))) {
-            String linha;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/dados/CONTRATOSINICIAL.CSV")))) {
+            String linha = br.readLine();
             while ((linha = br.readLine()) != null) {
-                String[] valores = linha.split(";");
+                try {
+                    String[] valores = linha.split(";");
 
+                    Cliente c = clientes.buscar(Integer.parseInt(valores[3]));
+                    Jogo j = jogos.buscar(Integer.parseInt(valores[4]));
+                    FormaPagamento fp = c.buscarFormaPagamento(Integer.parseInt(valores[5]));
+
+                    if (c != null && j != null && fp != null) {
+                        Contrato contrato = new Contrato(
+                            Integer.parseInt(valores[0]), 
+                            LocalDate.parse(valores[1], formatador), 
+                            Integer.parseInt(valores[2]), 
+                            c, 
+                            j, 
+                            fp
+                        );
+                        contratos.add(contrato);
+                    } else {
+                        System.out.println("Cliente, jogo ou forma de pagamento não encontrado para a linha: " + linha);
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("Erro ao processar a linha do arquivo de contratos: " + e.getMessage());
+                }
             }
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            System.out.println("Erro ao ler o arquivo de contratos: " + e.getMessage());
+        }
+        while (!contratos.isEmpty()) {
+            Contrato contrato = contratos.poll();
+            if (!this.contratos.adicionar(contrato)) {
+                System.out.println("Contrato já existe para o jogo " + contrato.getJogo().getNome() + " ou ID duplicado: " + contrato.getId());
+            } else {
+                System.out.println("Contrato adicionado com sucesso: " + contrato.descrever());
+            }
         }
     }
 }

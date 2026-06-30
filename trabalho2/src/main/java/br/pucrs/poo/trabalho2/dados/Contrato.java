@@ -1,16 +1,16 @@
 package br.pucrs.poo.trabalho2.dados;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Contrato {
     private int id;
-    private Date data;
+    private LocalDate data;
     private int periodo;
     private Cliente cliente;
     private Jogo jogo;
     private FormaPagamento formaPagamento;
 
-    public Contrato(int id, Date data, int periodo, Cliente cliente, Jogo jogo, FormaPagamento formaPagamento) {
+    public Contrato(int id, LocalDate data, int periodo, Cliente cliente, Jogo jogo, FormaPagamento formaPagamento) {
         this.id = id;
         this.data = data;
         this.periodo = periodo;
@@ -27,11 +27,11 @@ public class Contrato {
         this.id = id;
     }
 
-    public Date getData() {
+    public LocalDate getData() {
         return this.data;
     }
 
-    public void setData(Date data) {
+    public void setData(LocalDate data) {
         this.data = data;
     }
 
