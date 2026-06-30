@@ -1,5 +1,6 @@
 package br.pucrs.poo.trabalho2.dados;
 
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class Jogos {
     public boolean adicionar(Jogo jogo){
         if (buscar(jogo.getCodigo()) == null){
             jogos.add(jogo);
+            jogos.sort(Comparator.comparingInt(j -> j.getNumero()));
             return true;
         } 
         return false;
