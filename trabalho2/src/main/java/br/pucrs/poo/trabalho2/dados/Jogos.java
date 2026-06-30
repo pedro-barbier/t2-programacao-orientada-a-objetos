@@ -10,7 +10,7 @@ public class Jogos {
     public boolean adicionar(Jogo jogo){
         if (buscar(jogo.getCodigo()) == null){
             jogos.add(jogo);
-            jogos.sort(Comparator.comparingInt(j -> j.getNumero()));
+            jogos.sort(Comparator.comparingInt(j -> j.getCodigo()));
             return true;
         } 
         return false;
