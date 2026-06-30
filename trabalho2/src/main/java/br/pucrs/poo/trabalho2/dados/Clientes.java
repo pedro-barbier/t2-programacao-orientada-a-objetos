@@ -1,5 +1,6 @@
 package br.pucrs.poo.trabalho2.dados;
 
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class Clientes {
     public boolean adicionar(Cliente c){
         if (buscar(c.getNumero()) == null){
             clientes.add(c);
+            clientes.sort(Comparator.comparingInt(cl -> cl.getNumero()));
             return true;
         } 
         return false;
