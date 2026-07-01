@@ -43,20 +43,20 @@ public class Contrato {
         this.periodo = periodo;
     }
 
-    public Jogo getJogo() {
-        return this.jogo;
-    }
-
-    public void setJogo(Jogo jogo) {
-        this.jogo = jogo;
-    }
-
     public Cliente getCliente() {
         return this.cliente;
     }
 
     public void setCliente(Cliente cliente) {
         this.cliente = cliente;
+    }
+
+    public Jogo getJogo() {
+        return this.jogo;
+    }
+
+    public void setJogo(Jogo jogo) {
+        this.jogo = jogo;
     }
 
     public FormaPagamento getFormaPagamento() {
