@@ -119,7 +119,7 @@ public class CadastroContrato extends VerticalLayout {
                         : "")
                 .setHeader("Categoria");
         jogosGrid.addColumn(jogo -> jogo.getValorDiario()).setHeader("Valor Diário");
-
+        jogosGrid.addColumn(jogo -> jogo.getContrato() != null ? "Sim" : "Não").setHeader("Contratado");
         jogosGrid.setItems(jogos.getCopia());
         jogosGrid.setHeight("150px");
         jogosGrid.setWidthFull();
