@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.io.File;
 
@@ -483,6 +484,8 @@ public class ACMESpiele extends VerticalLayout {
                         fp
                     );
                     if (contratos.adicionar(contrato)) {
+                        c.addContrato(contrato);
+                        j.addContrato(contrato);
                         System.out.println("Contrato adicionado com sucesso: " + contrato.descrever());
                     } else {
                         System.out.println("Contrato já existe para o jogo " + j.getNome() + " ou ID duplicado: " + contrato.getId());
@@ -536,6 +539,12 @@ public class ACMESpiele extends VerticalLayout {
             }
             noCliente.set("formasPagamento", arrayFormasPagamento);
 
+            ArrayNode arrayContratosCliente = mapper.createArrayNode();
+            for (Contrato contrato : contratos.buscar(c)) {
+                arrayContratosCliente.add(contrato.getId());
+            }
+            noCliente.set("contratos", arrayContratosCliente);
+
             arrayClientes.add(noCliente);
         }
         raiz.set("clientes", arrayClientes);
@@ -549,6 +558,12 @@ public class ACMESpiele extends VerticalLayout {
             noJogo.put("ano", j.getAno());
             noJogo.put("valorDiario", j.getValorDiario());
             noJogo.put("categoria", j.getCategoria().name());
+
+            List<Contrato> contratosDoJogo = contratos.buscar(j);
+            if (!contratosDoJogo.isEmpty()) {
+                noJogo.put("contratoId", contratosDoJogo.get(0).getId());
+            }
+
             arrayJogos.add(noJogo);
         }
         raiz.set("jogos", arrayJogos);
