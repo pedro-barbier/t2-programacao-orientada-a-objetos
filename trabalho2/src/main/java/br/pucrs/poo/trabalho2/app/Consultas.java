@@ -172,7 +172,7 @@ public class Consultas extends VerticalLayout {
 
         List<Cliente> resultado = new ArrayList<>();
         for (Cliente cliente : todos) {
-            int quantidade = contratos.buscar(cliente).size();
+            int quantidade = contratos != null ? contratos.buscar(cliente).size() : 0;
             if (quantidade == maiorQuantidade) {
                 resultado.add(cliente);
             }

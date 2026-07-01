@@ -85,7 +85,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
         clienteGrid.setHeight("200px");
 
         ComboBox<Cliente> clientesComboBox = new ComboBox<>("Cliente");
-        clientesComboBox.setItems(clientes.getCopia());
+        clientesComboBox.setItems(clientes != null ? clientes.getCopia() : new java.util.ArrayList<>());
         clientesComboBox.setItemLabelGenerator(cliente ->
         cliente.getNumero() + " - " + cliente.getNome());
         clientesComboBox.setPlaceholder("Selecione um cliente");
@@ -112,7 +112,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
             }
         });
 
-        if (clientes.getCopia().isEmpty()) {
+        if (clientes == null || clientes.getCopia().isEmpty()) {
                 clientesComboBox.setEnabled(false);
                 Notification.show("Nenhum Cliente Cadastrado.", 3000, Notification.Position.MIDDLE);
         }
@@ -208,7 +208,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
             }
 
             if (valido) {
-                if (clientes.buscarFormasDePagamento(cod) != null) {
+                if (clientes != null && clientes.buscarFormasDePagamento(cod) != null) {
                     codField.setErrorMessage("Este código já está cadastrado.");
                     codField.setInvalid(true);
                     Notification.show("Código já cadastrado no sistema.", 3000, Notification.Position.MIDDLE);

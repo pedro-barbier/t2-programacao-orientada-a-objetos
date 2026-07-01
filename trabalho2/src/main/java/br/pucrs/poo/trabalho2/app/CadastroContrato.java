@@ -50,9 +50,9 @@ public class CadastroContrato extends VerticalLayout {
 
 
         Grid<Cliente> clientesGrid = new Grid<>(Cliente.class, false);
-        clientesGrid.addColumn(Cliente::getNumero).setHeader("Número");
-        clientesGrid.addColumn(Cliente::getNome).setHeader("Nome");
-        clientesGrid.addColumn(Cliente::getEmail).setHeader("E-mail");
+        clientesGrid.addColumn(cliente -> cliente.getNumero()).setHeader("Número");
+        clientesGrid.addColumn(cliente -> cliente.getNome()).setHeader("Nome");
+        clientesGrid.addColumn(cliente -> cliente.getEmail()).setHeader("E-mail");
         clientesGrid.addColumn(cliente ->
                 cliente instanceof ClienteCorporativo ? "Corporativo" : "Individual")
                 .setHeader("Tipo");
@@ -73,10 +73,10 @@ public class CadastroContrato extends VerticalLayout {
 
         Grid<FormaPagamento> formasPagamentoGrid = new Grid<>(FormaPagamento.class, false);
 
-        formasPagamentoGrid.addColumn(FormaPagamento::getCod)
-                .setHeader("Código");
+        formasPagamentoGrid.addColumn(formaPagamento -> formaPagamento.getCod())
+            .setHeader("Código");
 
-        formasPagamentoGrid.addColumn(FormaPagamento::getDiaVencimento)
+        formasPagamentoGrid.addColumn(formaPagamento -> formaPagamento.getDiaVencimento())
                 .setHeader("Dia de Vencimento");
 
         formasPagamentoGrid.addColumn(formaPagamento ->
@@ -111,14 +111,14 @@ public class CadastroContrato extends VerticalLayout {
 
         Grid<Jogo> jogosGrid = new Grid<>(Jogo.class, false);
 
-        jogosGrid.addColumn(Jogo::getCodigo).setHeader("Código");
-        jogosGrid.addColumn(Jogo::getNome).setHeader("Nome");
+        jogosGrid.addColumn(jogo -> jogo.getCodigo()).setHeader("Código");
+        jogosGrid.addColumn(jogo -> jogo.getNome()).setHeader("Nome");
         jogosGrid.addColumn(jogo ->
                 jogo.getCategoria() != null
                         ? jogo.getCategoria().getDescricao()
                         : "")
                 .setHeader("Categoria");
-        jogosGrid.addColumn(Jogo::getValorDiario).setHeader("Valor Diário");
+        jogosGrid.addColumn(jogo -> jogo.getValorDiario()).setHeader("Valor Diário");
 
         jogosGrid.setItems(jogos.getCopia());
         jogosGrid.setHeight("150px");

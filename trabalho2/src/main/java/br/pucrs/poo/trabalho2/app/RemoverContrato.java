@@ -60,10 +60,14 @@ public class RemoverContrato extends VerticalLayout {
             });
 
             Button confirmarBtn = new Button("Remover", ev -> {
-                contratos.remover(contratoSelecionado);
-                contratoGrid.setItems(contratos.getCopia());
-                contratoGrid.asSingleSelect().clear();
-                Notification.show("Contrato removido com sucesso.", 3000, Notification.Position.MIDDLE);
+                if (contratos == null) {
+                    Notification.show("Erro: nenhum contrato disponível para remoção.", 3000, Notification.Position.MIDDLE);
+                } else {
+                    contratos.remover(contratoSelecionado);
+                    contratoGrid.setItems(contratos.getCopia());
+                    contratoGrid.asSingleSelect().clear();
+                    Notification.show("Contrato removido com sucesso.", 3000, Notification.Position.MIDDLE);
+                }
                 dialogo.close();
             });
 

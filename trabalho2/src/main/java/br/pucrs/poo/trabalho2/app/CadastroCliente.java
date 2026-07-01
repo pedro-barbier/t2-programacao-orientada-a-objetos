@@ -137,7 +137,7 @@ public class CadastroCliente extends VerticalLayout {
 
             if (valido) {
                 Cliente novoCliente;
-                if (tipoValue.equals("Corporativo")) {
+                if ("Corporativo".equals(tipoValue)) {
                     novoCliente = new ClienteCorporativo(numero, nomeValue, emailValue, cnpjValue, nomeFantasiaValue);
                 } else {
                     novoCliente = new ClienteIndividual(numero, nomeValue, emailValue, cpfValue);
