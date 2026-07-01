@@ -3,7 +3,7 @@ package br.pucrs.poo.trabalho2.app;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H2;
+//import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
@@ -26,7 +26,7 @@ public class RelatorioClientes extends VerticalLayout {
 
     public RelatorioClientes() {
 
-        H2 titulo = new H2("Relatório de Clientes");
+        Text titulo = new Text("Relatório de Clientes");
         add(titulo);
 
         Clientes clientes = VaadinSession.getCurrent().getAttribute(Clientes.class);
