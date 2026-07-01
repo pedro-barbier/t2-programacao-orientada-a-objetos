@@ -38,4 +38,13 @@ public class Clientes {
         }
         return copia;
     }
+
+    public FormaPagamento buscarFormasDePagamento(int cod){
+        for (Cliente cliente : clientes) {
+            for (FormaPagamento formaPagamento : cliente.getFormasPagamento()) {
+                if (formaPagamento.getCod() == cod) return formaPagamento;
+            }
+        }
+        return null;
+    }
 }

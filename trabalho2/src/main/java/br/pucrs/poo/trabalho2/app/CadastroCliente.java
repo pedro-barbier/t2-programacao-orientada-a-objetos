@@ -27,7 +27,6 @@ public class CadastroCliente extends VerticalLayout {
         TextField numeroField = new TextField("Número");
         TextField nomeField = new TextField("Nome");
         EmailField emailField = new EmailField("Email");
-        emailField.setClearButtonVisible(true);
 
         RadioButtonGroup<String> tipoClienteGroup = new RadioButtonGroup<>();
         tipoClienteGroup.setLabel("Tipo de Cliente");
