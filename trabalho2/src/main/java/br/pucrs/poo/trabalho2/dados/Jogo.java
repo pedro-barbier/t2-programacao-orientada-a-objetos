@@ -1,8 +1,5 @@
 package br.pucrs.poo.trabalho2.dados;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Jogo {
     private int codigo;
     private String nome;
