@@ -9,7 +9,7 @@ public class Jogo {
     private int ano;
     private double valorDiario;
     private Categoria categoria;
-    private List<Contrato> contratos;
+    private Contrato contrato;
 
 
     public Jogo(int codigo, String nome, int ano, double valorDiario, Categoria categoria) {
@@ -18,7 +18,6 @@ public class Jogo {
         this.ano = ano;
         this.valorDiario = valorDiario;
         this.categoria = categoria;
-        this.contratos = new ArrayList<>();
     }
 
     public int getCodigo() {
@@ -62,15 +61,11 @@ public class Jogo {
     }
 
     public void addContrato(Contrato contrato) {
-        contratos.add(contrato);
+        this.contrato = contrato;
     }
 
-    public ArrayList<Contrato> getContratos() {
-        ArrayList<Contrato> aux = new ArrayList<>();
-        for (Contrato c : contratos) {
-            aux.add(c);
-        }
-        return aux;
+    public Contrato getContrato() {
+        return contrato;
     }
 
     public String descrever() {
