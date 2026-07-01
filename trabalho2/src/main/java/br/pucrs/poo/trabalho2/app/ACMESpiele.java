@@ -257,6 +257,7 @@ public class ACMESpiele extends VerticalLayout {
             }
         } catch (IOException e) {
             System.out.println("Erro ao ler o arquivo de clientes: " + e.getMessage());
+            Notification.show("Erro ao ler o arquivo de clientes: " + e.getMessage(), 3000, Notification.Position.TOP_END);
         }
 
         // JOGOS
@@ -282,6 +283,7 @@ public class ACMESpiele extends VerticalLayout {
             }
         } catch (IOException e) {
             System.out.println("Erro ao ler o arquivo de jogos: " + e.getMessage());
+            Notification.show("Erro ao ler o arquivo de jogos: " + e.getMessage(), 3000, Notification.Position.TOP_END);
         }
 
         // FORMAS DE PAGAMENTO
@@ -325,6 +327,7 @@ public class ACMESpiele extends VerticalLayout {
             }
         } catch (IOException e) {
             System.out.println("Erro ao ler o arquivo de formas de pagamento: " + e.getMessage());
+            Notification.show("Erro ao ler o arquivo de formas de pagamento: " + e.getMessage(), 3000, Notification.Position.TOP_END);
         }
 
         // CONTRATOS
@@ -360,6 +363,7 @@ public class ACMESpiele extends VerticalLayout {
             }
         } catch (IOException e) {
             System.out.println("Erro ao ler o arquivo de contratos: " + e.getMessage());
+            Notification.show("Erro ao ler o arquivo de contratos: " + e.getMessage(), 3000, Notification.Position.TOP_END);
         }
         while (!contratos.isEmpty()) {
             Contrato contrato = contratos.poll();
@@ -380,6 +384,7 @@ public class ACMESpiele extends VerticalLayout {
             raiz = mapper.readTree(new File(arquivo));
         } catch (Exception e) {
             System.out.println("Erro ao ler o arquivo de dados " + arquivo + ": " + e.getMessage());
+            Notification.show("Erro ao ler o arquivo de dados " + arquivo + ": " + e.getMessage(), 10000, Notification.Position.TOP_END);
             return;
         }
 
@@ -563,8 +568,10 @@ public class ACMESpiele extends VerticalLayout {
         try {
             mapper.writeValue(new File(arquivo), raiz);
             System.out.println("Dados salvos com sucesso no arquivo: " + arquivo);
+            Notification.show("Dados salvos com sucesso no arquivo: " + arquivo, 3000, Notification.Position.TOP_END);
         } catch (Exception e) {
             System.out.println("Erro ao salvar o arquivo de dados " + arquivo + ": " + e.getMessage());
+            Notification.show("Erro ao salvar o arquivo de dados " + arquivo + ": " + e.getMessage(), 10000, Notification.Position.TOP_END);
         }
     }
 }
