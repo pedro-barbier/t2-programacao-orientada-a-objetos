@@ -6,6 +6,8 @@ import java.time.format.DateTimeParseException;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.notification.Notification;
@@ -43,7 +45,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
         tipoPagamentoGroup.setItems("Cartão de Crédito", "PIX");
 
         TextField numeroField = new TextField("Número");
-        TextField validadeField = new TextField("Validade (AAAA-MM-DD)");
+        DatePicker validadeField = new DatePicker("Validade");
         TextField chaveField = new TextField("Chave");
 
         numeroField.setVisible(false);
@@ -58,6 +60,19 @@ public class CadastroFormaPagamento extends VerticalLayout {
             chaveField.setVisible(!cartaoCredito);
         });
 
+        VerticalLayout formularioPagamento = new VerticalLayout(
+                codField,
+                diaDeVencimentoField,
+                tipoPagamentoGroup,
+                numeroField,
+                validadeField,
+                chaveField
+        );
+
+        formularioPagamento.setPadding(false);
+        formularioPagamento.setSpacing(true);
+        formularioPagamento.setVisible(false);
+
         Clientes clientes = VaadinSession.getCurrent().getAttribute(Clientes.class);
 
         Grid<Cliente> clienteGrid = new Grid<>(Cliente.class, false);
@@ -67,27 +82,46 @@ public class CadastroFormaPagamento extends VerticalLayout {
         clienteGrid.addColumn(cliente -> cliente instanceof ClienteCorporativo ? "Corporativo" : "Individual")
                 .setHeader("Tipo").setAutoWidth(true);
         clienteGrid.setItems(clientes != null ? clientes.getCopia() : new java.util.ArrayList<>());
-        clienteGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
-        clienteGrid.setHeight("300px");
+        clienteGrid.setHeight("200px");
 
+        ComboBox<Cliente> clientesComboBox = new ComboBox<>("Cliente");
+        clientesComboBox.setItems(clientes.getCopia());
+        clientesComboBox.setItemLabelGenerator(cliente ->
+        cliente.getNumero() + " - " + cliente.getNome());
+        clientesComboBox.setPlaceholder("Selecione um cliente");
+        clientesComboBox.setWidth("400px");
 
-        clienteGrid.asSingleSelect().addValueChangeListener(event -> {
-            Cliente cliente = event.getValue();
+        clientesComboBox.addValueChangeListener(event -> {
+            Cliente clienteSelecionado = event.getValue();
 
-            if (cliente != null) {
-                Notification.show("Selecionado: " + cliente.getNome());
+            if (clienteSelecionado != null) {
+                formularioPagamento.setVisible(true);
+            } else {
+                formularioPagamento.setVisible(false);
+
+                codField.clear();
+                diaDeVencimentoField.clear();
+                tipoPagamentoGroup.clear();
+                numeroField.clear();
+                validadeField.clear();
+                chaveField.clear();
+
+                numeroField.setVisible(false);
+                validadeField.setVisible(false);
+                chaveField.setVisible(false);
             }
         });
+
+        if (clientes.getCopia().isEmpty()) {
+                clientesComboBox.setEnabled(false);
+                Notification.show("Nenhum Cliente Cadastrado.", 3000, Notification.Position.MIDDLE);
+        }
 
         Button voltarButton = new Button("Voltar", e -> UI.getCurrent().navigate(""));
 
         Button salvarButton = new Button("Salvar", event -> {
-            if (clientes == null) {
-                Notification.show("Nenhum Cliente Cadastrado.", 3000, Notification.Position.MIDDLE);
-                return;
-            }
 
-            Cliente clienteSelecionado = clienteGrid.asSingleSelect().getValue();
+            Cliente clienteSelecionado = clientesComboBox.getValue();
             if (clienteSelecionado == null) {
                 Notification.show("Selecione um cliente da lista antes de salvar.", 3000, Notification.Position.MIDDLE);
                 return;
@@ -105,7 +139,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
             String diaDeVencimentoValue = diaDeVencimentoField.getValue().trim();
             String numeroValue = numeroField.getValue().trim();
             String tipoValue = tipoPagamentoGroup.getValue();
-            String validadeValue = validadeField.getValue().trim();
+            LocalDate validadeValue = validadeField.getValue();
             String chaveValue = chaveField.getValue().trim();
             
 
@@ -133,7 +167,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
                     numeroField.setInvalid(true);
                     valido = false;
                 }
-                if (validadeValue.isEmpty()) {
+                if (validadeValue == null) {
                     validadeField.setErrorMessage("A validade é obrigatória.");
                     validadeField.setInvalid(true);
                     valido = false;
@@ -165,7 +199,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
                     valido = false;
                 }
                 try {
-                    validade = LocalDate.parse(validadeValue);
+                    validade = validadeValue;
                 } catch (DateTimeParseException ex) {
                     validadeField.setErrorMessage("A validade deve ser uma data válida.");
                     validadeField.setInvalid(true);
@@ -196,7 +230,7 @@ public class CadastroFormaPagamento extends VerticalLayout {
                     numeroField.setValue(null);
                     validadeField.clear();
                     chaveField.clear();
-                    clienteGrid.asSingleSelect().clear();
+                    clientesComboBox.clear();
                     numeroField.setVisible(false);
                     validadeField.setVisible(false);
                     chaveField.setVisible(false);
@@ -210,15 +244,13 @@ public class CadastroFormaPagamento extends VerticalLayout {
 
         HorizontalLayout botoes = new HorizontalLayout(voltarButton, salvarButton);
 
-        add(titulo,
+        add(
+            titulo,
             selecioneClienteTitulo,
             clienteGrid,
-            codField,
-            diaDeVencimentoField,
-            tipoPagamentoGroup,
-            numeroField,
-            validadeField,
-            chaveField,
-            botoes);
+            clientesComboBox,
+            formularioPagamento,
+            botoes
+        );
     }
 }
