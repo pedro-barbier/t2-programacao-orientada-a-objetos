@@ -88,10 +88,20 @@ public class ACMESpiele extends VerticalLayout {
             UI.getCurrent().navigate("cadastro-jogo");
         });
         Button cadFormaPagamento = new Button("Cadastrar formas de pagamento", e -> {
-            UI.getCurrent().navigate("cadastro-forma-pagamento");
+            if (clientes == null || clientes.getCopia().isEmpty()) {
+                Notification.show("Não há clientes cadastrados. Cadastre um cliente antes de cadastrar uma forma de pagamento.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("cadastro-forma-pagamento");
+            }
         });
         Button cadContrato = new Button("Cadastrar contratos", e -> {
-            UI.getCurrent().navigate("cadastro-contrato");
+            if (clientes == null || clientes.getCopia().isEmpty()) {
+                Notification.show("Não há clientes cadastrados. Cadastre um cliente antes de cadastrar um contrato.", 3000, Notification.Position.MIDDLE);
+            } else if (jogos == null || jogos.getCopia().isEmpty()) {
+                Notification.show("Não há jogos cadastrados. Cadastre um jogo antes de cadastrar um contrato.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("cadastro-contrato");
+            }
         });
         VerticalLayout area1 = new VerticalLayout(subtitulo, cadCliente, cadJogo, cadFormaPagamento, cadContrato);
         add(area1);
@@ -99,13 +109,25 @@ public class ACMESpiele extends VerticalLayout {
         //// AREA DE RELATORIOS (5-7)
         Text subtitulo2 = new Text("Area de relatorios");
         Button relatorioJogos = new Button("Relatorio de jogos", e -> {
-            UI.getCurrent().navigate("relatorio-jogos");
+            if (jogos == null || jogos.getCopia().isEmpty()) {
+                Notification.show("Não há jogos cadastrados.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("relatorio-jogos");
+            }
         });
         Button relatorioClientes = new Button("Relatorio de clientes", e -> {
-            UI.getCurrent().navigate("relatorio-clientes");
+            if (clientes == null || clientes.getCopia().isEmpty()) {
+                Notification.show("Não há clientes cadastrados.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("relatorio-clientes");
+            }
         });
         Button relatorioContratos = new Button("Relatorio de contratos", e -> {
-            UI.getCurrent().navigate("relatorio-contratos");
+            if (contratos == null || contratos.getCopia().isEmpty()) {
+                Notification.show("Não há contratos cadastrados.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("relatorio-contratos");
+            }
         });
         VerticalLayout area2 = new VerticalLayout(subtitulo2, relatorioJogos, relatorioClientes, relatorioContratos);
         add(area2);
@@ -120,7 +142,11 @@ public class ACMESpiele extends VerticalLayout {
             }
         });
         Button alterarCliente = new Button("Alterar cliente", e -> {
-            UI.getCurrent().navigate("alterar-cliente");
+            if (clientes == null || clientes.getCopia().isEmpty()) {
+                Notification.show("Não há clientes cadastrados.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("alterar-cliente");
+            }
         });
         Button consultar = new Button("Consultar", e -> {
             UI.getCurrent().navigate("consultas");
