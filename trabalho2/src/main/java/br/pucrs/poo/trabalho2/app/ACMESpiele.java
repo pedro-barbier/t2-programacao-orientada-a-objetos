@@ -113,7 +113,11 @@ public class ACMESpiele extends VerticalLayout {
         //// AREA ADMINISTRATIVA (8-10)
         Text subtitulo3 = new Text("Area administrativa");
         Button removerContrato = new Button("Remover contrato", e -> {
-            UI.getCurrent().navigate("remover-contrato");
+            if (contratos == null || contratos.getCopia().isEmpty()) {
+                Notification.show("Não há contratos cadastrados.", 3000, Notification.Position.MIDDLE);
+            } else {
+                UI.getCurrent().navigate("remover-contrato");
+            }
         });
         Button alterarCliente = new Button("Alterar cliente", e -> {
             UI.getCurrent().navigate("alterar-cliente");
