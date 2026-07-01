@@ -69,22 +69,24 @@ public class Contrato {
 
     public double calculaValorFinal() {
         double valorBase = getJogo().getValorDiario();
+        double aumento = 0.0;
         switch (getJogo().getCategoria()) {
             case Categoria.AVENTURA:
-                valorBase *= 1.05; // Aventura: +5%
+                aumento += 0.05; // Aventura: +5%
                 break;
             case Categoria.ESTRATEGIA:
-                valorBase *= 1.10; // Estratégia: +10%
+                aumento += 0.10; // Estratégia: +10%
                 break;
             case Categoria.CORRIDA:
-                valorBase *= 1.15; // Corrida: +15%
+                aumento += 0.15; // Corrida: +15%
                 break;
         }
         if (getFormaPagamento() instanceof PIX) {
-            valorBase *= 0.95; // PIX: -5%
+            aumento -= 0.05; // PIX: -5%
         } else if (getFormaPagamento() instanceof CartaoCredito) {
-            valorBase *= 1.05; // Cartão de Crédito: +5%
+            aumento += 0.05; // Cartão de Crédito: +5%
         }
+        valorBase += valorBase * aumento;
         if (getCliente().getContratos().size() > 2) {
             return (valorBase * getPeriodo()) * 0.97;
         } else {
