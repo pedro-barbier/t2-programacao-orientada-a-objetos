@@ -353,6 +353,8 @@ public class ACMESpiele extends VerticalLayout {
                             fp
                         );
                         contratos.add(contrato);
+                        c.addContrato(contrato);
+                        j.addContrato(contrato);
                     } else {
                         System.out.println("Cliente, jogo ou forma de pagamento não encontrado para a linha: " + linha);
                     }
