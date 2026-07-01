@@ -1,33 +1,62 @@
 package br.pucrs.poo.trabalho2.app;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedList;
+import java.util.Queue;
+
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
-
-import br.pucrs.poo.trabalho2.dados.*;
+import br.pucrs.poo.trabalho2.dados.CartaoCredito;
+import br.pucrs.poo.trabalho2.dados.Categoria;
+import br.pucrs.poo.trabalho2.dados.Cliente;
+import br.pucrs.poo.trabalho2.dados.ClienteCorporativo;
+import br.pucrs.poo.trabalho2.dados.ClienteIndividual;
+import br.pucrs.poo.trabalho2.dados.Clientes;
+import br.pucrs.poo.trabalho2.dados.Contrato;
+import br.pucrs.poo.trabalho2.dados.Contratos;
+import br.pucrs.poo.trabalho2.dados.FormaPagamento;
+import br.pucrs.poo.trabalho2.dados.Jogo;
+import br.pucrs.poo.trabalho2.dados.Jogos;
+import br.pucrs.poo.trabalho2.dados.PIX;
 
 @PageTitle("ACME Spiele - Sistema de Locacao de Jogos")
 @Route("")
 public class ACMESpiele extends VerticalLayout {
-    private Clientes clientes = new Clientes();
-    private Jogos jogos = new Jogos();
-    private Contratos contratos = new Contratos();
+    private Clientes clientes;
+    private Jogos jogos;
+    private Contratos contratos;
 
     public ACMESpiele() {
+        clientes = VaadinSession.getCurrent().getAttribute(Clientes.class);
+        if (clientes == null) {
+            clientes = new Clientes();
+            VaadinSession.getCurrent().setAttribute(Clientes.class, clientes);
+        }
+
+        jogos = VaadinSession.getCurrent().getAttribute(Jogos.class);
+        if (jogos == null) {
+            jogos = new Jogos();
+            VaadinSession.getCurrent().setAttribute(Jogos.class, jogos);
+        }
+
+        contratos = VaadinSession.getCurrent().getAttribute(Contratos.class);
+        if (contratos == null) {
+            contratos = new Contratos();
+            VaadinSession.getCurrent().setAttribute(Contratos.class, contratos);
+        }
+        
         Boolean dialogoExibido = (Boolean) VaadinSession.getCurrent().getAttribute("dialogoInicialExibido");
         if (dialogoExibido == null || !dialogoExibido) {
             VaadinSession.getCurrent().setAttribute("dialogoInicialExibido", true);

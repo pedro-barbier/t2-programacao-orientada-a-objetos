@@ -1,5 +1,6 @@
 package br.pucrs.poo.trabalho2.dados;
 
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public abstract class Cliente {
 
     public void addFormaPagamento(FormaPagamento formaPagamento) {
         formasPagamento.add(formaPagamento);
+        formasPagamento.sort(Comparator.comparingInt(f -> f.getCod()));
     }
 
     public List<FormaPagamento> getFormasPagamento() {
