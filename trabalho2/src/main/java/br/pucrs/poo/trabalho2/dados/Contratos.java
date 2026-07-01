@@ -1,5 +1,6 @@
 package br.pucrs.poo.trabalho2.dados;
 
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class Contratos {
     public boolean adicionar(Contrato contrato){
         if (buscar(contrato.getId()) == null && buscar(contrato.getJogo()).isEmpty()){
             contratos.add(contrato);
+            contratos.sort(Comparator.comparingInt((Contrato c) -> c.getId()).reversed());
             return true;
         }
         return false;
